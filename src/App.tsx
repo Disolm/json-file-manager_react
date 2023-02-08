@@ -41,6 +41,7 @@ export function App() {
             ]
         }])
     type fileType = string | boolean | object[] | object | number
+
     const whatJson = function (json: fileType) {
         if (Array.isArray(json)) {
             return 'array'
@@ -161,6 +162,10 @@ export function App() {
         return <div>error</div>
 
     }
+    const downloadJson = function (fileText: string) {
+        const json = JSON.parse(fileText)
+        setJsonData(json)
+    }
     return (
         <div className='flex flex-col justify-center bg-gray-100 my-6'>
             <div className='flex flex-row flex-nowrap my-4 justify-center items-center'>
@@ -172,21 +177,21 @@ export function App() {
                 />
             </div>
             <div className='h-0.5 my-1 w-full bg-blue-900'/>
-            <div className='flex flex-row items-center'>
-                <TheButton
-                    nameBtn='+'
-                />
-                <TheSelect/>
-                <TheInput
-                    initialValueInput={'123'}
-                />
-                <TheButton
-                    nameBtn='-'
-                />
-            </div>
-            {/*<div>*/}
-            {/*    <DownloadFile/>*/}
+            {/*<div className='flex flex-row items-center'>*/}
+            {/*    <TheButton*/}
+            {/*        nameBtn='+'*/}
+            {/*    />*/}
+            {/*    <TheSelect/>*/}
+            {/*    <TheInput*/}
+            {/*        initialValueInput={'123'}*/}
+            {/*    />*/}
+            {/*    <TheButton*/}
+            {/*        nameBtn='-'*/}
+            {/*    />*/}
             {/*</div>*/}
+            <div>
+                <DownloadFile dataUpdate={downloadJson}/>
+            </div>
             <br/>
             {/*<div>*/}
             {/*    {JSON.stringify(jsonData)}*/}
