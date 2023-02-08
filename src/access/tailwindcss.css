@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer components {
+    .cast-btn {
+        @apply px-6
+        bg-blue-600
+        h-10
+        mx-1
+        text-white
+        font-medium
+        rounded
+        hover:bg-blue-700
+        hover:shadow-lg
+        focus:bg-blue-700
+        focus:shadow-lg
+        focus:outline-none
+        focus:ring-0
+        active:bg-blue-800
+        active:shadow-lg
+        transition
+        duration-150
+        ease-in-out
+    }
+
+    .cast-option {
+        @apply font-medium
+        w-full h-10
+        text-white
+        px-2
+        bg-blue-600
+        border-0
+        border-gray-200
+        rounded
+        focus:outline-none
+        focus:ring-0
+        focus:border-gray-200
+        focus:bg-blue-700
+    }
+    .cast-input {
+        @apply bg-blue-50 border mx-1
+        text-blue-600 rounded-lg block px-2
+        font-medium border-blue-600
+        focus:ring-blue-600
+        focus:outline-blue-600
+    }
+    .input-file {
+        @apply relative inline-block
+    }
+    .input-file__span {
+        text-decoration: none;
+        font-size: 14px;
+        vertical-align: middle;
+        line-height: 22px;
+        box-sizing: border-box;
+        transition: background-color 0.2s;
+        @apply relative
+        inline-block
+        cursor-pointer
+        outline-none
+        text-white
+        align-middle
+        rounded
+        bg-blue-600
+        h-10
+        px-2 py-2.5 m-0
+        border-none
+        focus:bg-blue-700
+        active:bg-blue-700
+        hover:bg-blue-700
+    }
+    .input-file__input {
+        display: none;
+    }
+}
