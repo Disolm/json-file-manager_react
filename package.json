@@ -8,8 +8,9 @@
     "last 2 versions"
   ],
   "source": "src/index.html",
+  "port": "3000",
   "scripts": {
-    "start": "parcel",
+    "start": "parcel --port 3000",
     "build": "parcel build"
   },
   "keywords": [],

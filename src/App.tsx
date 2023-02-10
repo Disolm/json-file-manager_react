@@ -3,6 +3,7 @@ import {TheSelect} from "./components/TheSelect";
 import {TheInput} from "./components/TheInput";
 import {DownloadFile} from "./components/DownloadFile";
 import React, {useState} from "react";
+import {UploadFile} from "./components/UploadFile";
 
 export function App() {
     const [jsonData, setJsonData] = useState([
@@ -57,8 +58,18 @@ export function App() {
             return (
                 Object.entries(json).map(([keyObj, valueObj]) => {
                     let keyEl: string = keyObj + JSON.stringify(valueObj)
+                    const valueObjNotArr: string = whatJson(valueObj) === 'array' ? valueObj.join(', ') : valueObj
+                    const [valueInput, setValueInput] = useState(valueObjNotArr)
                     const [isShowInput, setIsShowInput] = useState(true)
-                    const [valueInput, setValueInput] = useState(whatJson(valueObj) === 'array' ? valueObj.join(', ') : valueObj)
+
+                    // if (valueInput !== valueObjNotArr) {
+                    //     // console.log(111, valueInput, valueObjNotArr)
+                    //     setValueInput(valueObjNotArr)
+                    //     // console.log(valueInput)
+                    //     setIsShowInput(true)
+                    // }
+                    // console.log(222, valueInput, valueObjNotArr)
+
                     const classButton: string = 'w-full mx-1 px-2 border border-blue-600 bg-white rounded active:bg-blue-200'
                     const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
                         setValueInput(event.target.value)
@@ -74,9 +85,7 @@ export function App() {
                                 newValue = ('true' === newValue) || ('false' === newValue)  ? 'true' === newValue : newValue
                                 break;
                             case 'array':
-                                if (typeof newValue === "string") {
-                                    newValue = newValue.split(",")
-                                }
+                                newValue = newValue.split(",")
                                 //TODO проработать вариант массив разных типов.
                                 break;
                         }
@@ -101,6 +110,7 @@ export function App() {
                                 onClick={(event) => {
                                     event.stopPropagation()
                                     if (whatJson(valueObj) === 'object') return
+                                    setValueInput(valueObjNotArr)
                                     setIsShowInput(false)
                                 }}
                             >
@@ -189,15 +199,12 @@ export function App() {
             {/*        nameBtn='-'*/}
             {/*    />*/}
             {/*</div>*/}
-            <div>
+            <div className='flex flex-row justify-center items-center my-4'>
                 <DownloadFile dataUpdate={downloadJson}/>
+                <UploadFile json={jsonData}/>
             </div>
-            <br/>
-            {/*<div>*/}
-            {/*    {JSON.stringify(jsonData)}*/}
-            {/*</div>*/}
             <div
-                className='m-2 p-2 font-medium text-blue-600 bg-white'
+                className='p-4 font-medium text-blue-600 bg-white'
             >
                 {
                     returnHTML(jsonData)

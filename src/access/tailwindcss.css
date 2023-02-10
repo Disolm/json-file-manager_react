@@ -6,7 +6,7 @@
         @apply px-6
         bg-blue-600
         h-10
-        mx-1
+        m-2
         text-white
         font-medium
         rounded
@@ -47,7 +47,7 @@
     .input-file {
         @apply relative inline-block
     }
-    .input-file__span {
+    .input-file__span, .button-upload-file {
         text-decoration: none;
         font-size: 14px;
         vertical-align: middle;

@@ -1,7 +1,9 @@
 import React, {useState} from "react";
+
 interface FileProps {
     dataUpdate: any
 }
+
 export function DownloadFile(props: FileProps) {
     // const [valueInput, setValueInput] = useState({})
 
@@ -24,20 +26,18 @@ export function DownloadFile(props: FileProps) {
     return (
         <>
             {/*<input type="file" id="input" accept=".json"/>*/}
-            <form>
-                <label className="input-file">
-                    <input
-                        className="input-file__input"
-                        type="file" name="file" accept=".json"
-                        onChange={changeHandler}
-                    />
-                        <span
-                            className="input-file__span"
-                        >
+            <label className="input-file m-2">
+                <input
+                    className="input-file__input"
+                    type="file" name="file" accept=".json"
+                    onChange={changeHandler}
+                />
+                <span
+                    className="input-file__span"
+                >
                             Выберите файл
                         </span>
-                </label>
-            </form>
+            </label>
         </>
     )
 }
