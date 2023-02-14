@@ -1,31 +1,27 @@
-import React, {useState} from "react";
+import React from "react";
+import {useJsonData} from "../../hooks/jsonData";
 
-interface FileProps {
-    dataUpdate: any
-}
-
-export function DownloadFile(props: FileProps) {
-    // const [valueInput, setValueInput] = useState({})
-
+export function DownloadFile() {
+    const {saveJson} = useJsonData()
     const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!event.currentTarget.files) return;
         let file = event.currentTarget.files[0]
         let reader = new FileReader()
         reader.readAsText(file)
         reader.onload = function () {
-            const fileText: string | ArrayBuffer | null = reader.result
-            if (typeof fileText === "string") {
-                // setValueInput(JSON.parse(fileText))
-                props.dataUpdate(fileText)
+            const jsonText: string | ArrayBuffer | null = reader.result
+            if (typeof jsonText === "string") {
+                const json = JSON.parse(jsonText)
+                saveJson(json)
             }
         }
         reader.onerror = function () {
             console.log(reader.error)
         }
+        event.currentTarget.value = ''
     }
     return (
         <>
-            {/*<input type="file" id="input" accept=".json"/>*/}
             <label className="input-file m-2">
                 <input
                     className="input-file__input"
@@ -35,8 +31,8 @@ export function DownloadFile(props: FileProps) {
                 <span
                     className="input-file__span"
                 >
-                            Выберите файл
-                        </span>
+                    Выберите файл
+                </span>
             </label>
         </>
     )

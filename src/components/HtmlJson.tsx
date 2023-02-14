@@ -1,8 +1,10 @@
 import React, {useState} from "react";
+import {useJsonData} from "../../hooks/jsonData";
 type fileType = string | boolean | object[] | object | number
 
-export function HtmlJson({json}: any) {
-    const [jsonData, setJsonData] = useState()
+export function HtmlJson() {
+    const {jsonData, saveJson} = useJsonData()
+    const classButton: string = 'w-full mx-1 px-2 border border-blue-600 bg-white rounded active:bg-blue-200'
 
     const whatJson = function (json: fileType) {
         if (Array.isArray(json)) {
@@ -11,13 +13,11 @@ export function HtmlJson({json}: any) {
             return typeof json
         }
     }
-    const upDataJSON = function () {
-        setJsonData(jsonData)
-    }
-    const returnHTML = function (json: fileType) {
-        if (whatJson(json) === 'object') {
+    const returnHTML = function (jsonObj: fileType) {
+        if (whatJson(jsonObj) === 'object') {
+            console.log('returnHTML')
             return (
-                Object.entries(json).map(([keyObj, valueObj]) => {
+                Object.entries(jsonObj).map(([keyObj, valueObj]) => {
                         let keyEl: string = keyObj + JSON.stringify(valueObj)
                         const valueObjNotArr: string = whatJson(valueObj) === 'array' ? valueObj.join(', ') : valueObj
                         const [valueInput, setValueInput] = useState(valueObjNotArr)
@@ -31,7 +31,6 @@ export function HtmlJson({json}: any) {
                         // }
                         // console.log(222, valueInput, valueObjNotArr)
 
-                        const classButton: string = 'w-full mx-1 px-2 border border-blue-600 bg-white rounded active:bg-blue-200'
                         const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
                             setValueInput(event.target.value)
                         }
@@ -53,7 +52,7 @@ export function HtmlJson({json}: any) {
                             // @ts-ignore
                             json[keyObj] = newValue
                             setIsShowInput(true)
-                            upDataJSON()
+                            saveJson(jsonData)
                         }
                         return (
                             <div
@@ -115,9 +114,9 @@ export function HtmlJson({json}: any) {
 
             )
         }
-        if (json instanceof Array) {
+        if (jsonObj instanceof Array) {
             return (
-                json.map((obj: object) =>
+                jsonObj.map((obj: object) =>
                     (
                         <div
                             key={JSON.stringify(obj)}
@@ -131,6 +130,12 @@ export function HtmlJson({json}: any) {
             )
         }
         return <div>error</div>
-
     }
+    return(
+        <>
+            {
+                returnHTML(jsonData)
+            }
+        </>
+    )
 }
