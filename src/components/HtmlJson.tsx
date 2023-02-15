@@ -15,7 +15,7 @@ export function HtmlJson() {
     }
     const returnHTML = function (jsonObj: fileType) {
         if (whatJson(jsonObj) === 'object') {
-            console.log('returnHTML')
+            console.log('returnHTML', jsonData)
             return (
                 Object.entries(jsonObj).map(([keyObj, valueObj]) => {
                         let keyEl: string = keyObj + JSON.stringify(valueObj)
@@ -50,7 +50,7 @@ export function HtmlJson() {
                                     break;
                             }
                             // @ts-ignore
-                            json[keyObj] = newValue
+                            jsonObj[keyObj] = newValue
                             setIsShowInput(true)
                             saveJson(jsonData)
                         }
