@@ -40,7 +40,6 @@ export function useJsonData() {
         }])
     const saveJson = function (jsonOld: fileType) {
         setJsonData(jsonOld)
-        console.log('saveJson', jsonOld)
     }
     return {jsonData, saveJson}
 }

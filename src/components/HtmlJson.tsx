@@ -1,9 +1,48 @@
 import React, {useState} from "react";
-import {useJsonData} from "../../hooks/jsonData";
+// import {useJsonData} from "../../hooks/jsonData";
+import {createStore} from "../../hooks/createStore";
+import {rootReducerFun} from "../../redux/rootReducer";
+import {SAVE} from '../types'
 type fileType = string | boolean | object[] | object | number
 
 export function HtmlJson() {
-    const {jsonData, saveJson} = useJsonData()
+    const jsonDefault = [
+        {
+            "name": "Madame Uppercut",
+            "age": 39,
+            "secretIdentity": "Jane Wilson",
+            "powers": [
+                "Million tonne punch",
+                "Damage resistance",
+                "Superhuman reflexes"
+            ],
+            "data": {
+                "squadName": "Super hero squad",
+                "homeTown": "Metro City",
+                "formed": 2016,
+                "secretBase": "Super tower",
+                "active": false,
+                "data2": {
+                    "squadName": "Super hero squad",
+                    "homeTown": "Metro City",
+                    "formed": 2016,
+                    "secretBase": "Super tower",
+                    "active": true
+                }
+            }
+        },
+        {
+            "name": "Molecule Man",
+            "age": 29,
+            "secretIdentity": "Dan Jokes",
+            "powers": [
+                "Radiation resistance",
+                "Turning tiny",
+                "Radiation blast"
+            ]
+        }]
+    const store = createStore(rootReducerFun, jsonDefault)
+    // const {jsonData, saveJson} = useJsonData()
     const classButton: string = 'w-full mx-1 px-2 border border-blue-600 bg-white rounded active:bg-blue-200'
 
     const whatJson = function (json: fileType) {
@@ -15,7 +54,7 @@ export function HtmlJson() {
     }
     const returnHTML = function (jsonObj: fileType) {
         if (whatJson(jsonObj) === 'object') {
-            console.log('returnHTML')
+            // console.log('returnHTML')
             return (
                 Object.entries(jsonObj).map(([keyObj, valueObj]) => {
                         let keyEl: string = keyObj + JSON.stringify(valueObj)
@@ -50,9 +89,14 @@ export function HtmlJson() {
                                     break;
                             }
                             // @ts-ignore
-                            json[keyObj] = newValue
+                            jsonObj[keyObj] = newValue
                             setIsShowInput(true)
-                            saveJson(jsonData)
+                            store.dispatch({
+                                type: SAVE,
+                                jsonNew: store.getState()
+                            })
+
+                            // saveJson(jsonData)
                         }
                         return (
                             <div
@@ -133,8 +177,15 @@ export function HtmlJson() {
     }
     return(
         <>
+            <div
+                onClick={()=>{
+                    console.log(store.getState())
+                }}
+            >
+                JSON
+            </div>
             {
-                returnHTML(jsonData)
+                returnHTML(store.getState())
             }
         </>
     )

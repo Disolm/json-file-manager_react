@@ -3,3 +3,6 @@ export interface ITypeOption {
     name: string
     type: string
 }
+
+export class SAVE {
+}
