@@ -1,8 +1,9 @@
 import React from "react";
-import {useJsonData} from "../../hooks/jsonData";
 
-export function DownloadFile() {
-    const {saveJson} = useJsonData()
+interface JsonProps {
+    saveJson: (jsonData: object[] | object) => void
+}
+export function DownloadFile({saveJson}: JsonProps) {
     const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!event.currentTarget.files) return;
         let file = event.currentTarget.files[0]
@@ -12,6 +13,7 @@ export function DownloadFile() {
             const jsonText: string | ArrayBuffer | null = reader.result
             if (typeof jsonText === "string") {
                 const json = JSON.parse(jsonText)
+                console.log(json)
                 saveJson(json)
             }
         }

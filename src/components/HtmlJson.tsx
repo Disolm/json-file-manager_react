@@ -1,9 +1,15 @@
 import React, {useState} from "react";
-import {useJsonData} from "../../hooks/jsonData";
-type fileType = string | boolean | object[] | object | number
 
-export function HtmlJson() {
-    const {jsonData, saveJson} = useJsonData()
+type fileType = string | boolean | object[] | object | number
+type jsonType = object[] | object
+
+interface JsonProps {
+    jsonData: object[] | object
+    saveJson: (jsonData: object[] | object) => void
+}
+
+export function HtmlJson({jsonData, saveJson}: JsonProps) {
+    console.log('HtmlJson')
     const classButton: string = 'w-full mx-1 px-2 border border-blue-600 bg-white rounded active:bg-blue-200'
 
     const whatJson = function (json: fileType) {
@@ -13,9 +19,23 @@ export function HtmlJson() {
             return typeof json
         }
     }
-    const returnHTML = function (jsonObj: fileType) {
-        if (whatJson(jsonObj) === 'object') {
-            console.log('returnHTML', jsonData)
+    const returnHTML = function (jsonObj: jsonType) {
+        if (jsonObj instanceof Array) {
+            return (
+                jsonObj.map((obj: object, index) =>
+                    (
+                        <div
+                            key={JSON.stringify(obj)}
+                            className='h10 mb-6'
+                        >
+                            {returnHTML(obj)}
+                        </div>
+
+                    )
+                )
+            )
+        }
+        else {
             return (
                 Object.entries(jsonObj).map(([keyObj, valueObj]) => {
                         let keyEl: string = keyObj + JSON.stringify(valueObj)
@@ -24,9 +44,9 @@ export function HtmlJson() {
                         const [isShowInput, setIsShowInput] = useState(true)
 
                         // if (valueInput !== valueObjNotArr) {
-                        //     // console.log(111, valueInput, valueObjNotArr)
+                        //     console.log(111, valueInput, valueObjNotArr)
                         //     setValueInput(valueObjNotArr)
-                        //     // console.log(valueInput)
+                        //     console.log(valueInput)
                         //     setIsShowInput(true)
                         // }
                         // console.log(222, valueInput, valueObjNotArr)
@@ -37,12 +57,12 @@ export function HtmlJson() {
                         const saveChangeJson = function (event: React.DetailedHTMLProps<any, any>) {
                             event.stopPropagation()
                             let newValue: fileType = valueInput
-                            switch(whatJson(valueObj)) {
+                            switch (whatJson(valueObj)) {
                                 case 'number':
                                     newValue = isNaN(+newValue) ? newValue : +newValue
                                     break;
                                 case 'boolean':
-                                    newValue = ('true' === newValue) || ('false' === newValue)  ? 'true' === newValue : newValue
+                                    newValue = ('true' === newValue) || ('false' === newValue) ? 'true' === newValue : newValue
                                     break;
                                 case 'array':
                                     newValue = newValue.split(",")
@@ -79,7 +99,8 @@ export function HtmlJson() {
                                             whatJson(valueObj) === 'array' ? valueObj.join(', ') : whatJson(valueObj) === 'object' ? returnHTML(valueObj) :
                                                 whatJson(valueObj) === 'boolean' ? valueObj.toString() :
                                                     valueObj
-                                        }{whatJson(valueObj) !== 'object' && <span className='text-black'>: {whatJson(valueObj)}</span>}
+                                        }{whatJson(valueObj) !== 'object' &&
+                                        <span className='text-black'>: {whatJson(valueObj)}</span>}
                                     </div>}
                                     {
                                         whatJson(valueObj) !== 'object' && !isShowInput &&
@@ -114,24 +135,9 @@ export function HtmlJson() {
 
             )
         }
-        if (jsonObj instanceof Array) {
-            return (
-                jsonObj.map((obj: object) =>
-                    (
-                        <div
-                            key={JSON.stringify(obj)}
-                            className='h10 mb-6'
-                        >
-                            {returnHTML(obj)}
-                        </div>
 
-                    )
-                )
-            )
-        }
-        return <div>error</div>
     }
-    return(
+    return (
         <>
             {
                 returnHTML(jsonData)

@@ -1,10 +1,11 @@
 import React from "react";
-import {useJsonData} from "../../hooks/jsonData";
 
+interface JsonProps {
+    jsonData: object[] | object
+}
 type jsonType = object | object[]
 
-export function UploadFile() {
-    const {jsonData} = useJsonData()
+export function UploadFile({jsonData}:JsonProps) {
     const clickHandler = function (json: jsonType) {
         const indentInJson: string = '    '
         const textData: string = JSON.stringify(json, null, indentInJson)
