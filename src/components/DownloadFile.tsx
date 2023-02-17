@@ -13,7 +13,6 @@ export function DownloadFile({saveJson}: JsonProps) {
             const jsonText: string | ArrayBuffer | null = reader.result
             if (typeof jsonText === "string") {
                 const json = JSON.parse(jsonText)
-                console.log(json)
                 saveJson(json)
             }
         }

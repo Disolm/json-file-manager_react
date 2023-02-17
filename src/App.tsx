@@ -1,4 +1,5 @@
 import React from "react";
+
 import {DownloadFile} from "./components/DownloadFile";
 import {UploadFile} from "./components/UploadFile";
 import {HtmlJson} from "./components/HtmlJson";
@@ -6,7 +7,6 @@ import {useJsonData} from "../hooks/jsonData";
 
 export function App() {
     const {jsonData, saveJson} = useJsonData()
-
     return (
         <div className='flex flex-col justify-center bg-gray-100 my-6'>
             <div className='flex flex-row flex-nowrap my-4 justify-center items-center'>
@@ -19,7 +19,6 @@ export function App() {
             >
                 <HtmlJson jsonData={jsonData} saveJson={saveJson}/>
             </div>
-
         </div>
     )
 }

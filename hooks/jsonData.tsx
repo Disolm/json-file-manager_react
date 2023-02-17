@@ -24,7 +24,13 @@ export function useJsonData() {
                     "homeTown": "Metro City",
                     "formed": 2016,
                     "secretBase": "Super tower",
-                    "active": true
+                    "active": true,
+                    "status": undefined,
+                    "cash": null,
+                    "mix": [{
+                        "age": 49,
+                        "secretBase": "Kimi ga Kureta Mono"
+                        },"next", 0, false, undefined, null ]
                 }
             }
         },
@@ -40,7 +46,13 @@ export function useJsonData() {
         }])
     const saveJson = function (jsonOld: fileType) {
         setJsonData(jsonOld)
-        console.log('saveJson', jsonOld)
     }
-    return {jsonData, saveJson}
+    const [jsonData2, setJsonData2] = useState<fileType>([
+        {
+            "name": "Madame Uppercut",
+        }])
+    const saveJson2 = function (jsonOld: fileType) {
+        setJsonData2(jsonOld)
+    }
+    return {jsonData, saveJson, jsonData2, saveJson2}
 }
