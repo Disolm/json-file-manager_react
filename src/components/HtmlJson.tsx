@@ -8,12 +8,15 @@ type JSONValue = string | number | boolean | { [x: string]: JSONValue } | JSONVa
 
 interface JsonProps {
     jsonData: jsonType
-    saveJson: (jsonData: object | object[]) => void
+    jsonDataBuffer: jsonType
+    saveJson: () => void
+    changeJson: (jsonData: object | object[]) => void
+    cancelChangeJson: () => void
 }
 
-export function HtmlJson({jsonData, saveJson}: JsonProps) {
+export function HtmlJson({jsonData, jsonDataBuffer, saveJson, changeJson, cancelChangeJson}: JsonProps) {
     const classButton: string = 'w-full mx-1 px-2 border border-blue-600 bg-white rounded active:bg-blue-200'
-
+    const pathNull: [] = []
     const whatType = function (json: fileType) {
         if (Array.isArray(json)) {
             return 'array'
@@ -33,16 +36,16 @@ export function HtmlJson({jsonData, saveJson}: JsonProps) {
             } else {
                 jsonChang[path] = event.target.value
                 if (whatType(jsonData) === 'object') {
-                    saveJson({...jsonData})
+                    changeJson({...jsonData})
                 }
                 if (whatType(jsonData) === 'array') {
-                    saveJson([...jsonData])
+                    changeJson([...jsonData])
                 }
             }
         })
     }
 
-    const [currentClick, setCurrentClick] = useState<pathType>([])
+    const [currentClick, setCurrentClick] = useState<pathType>(pathNull)
     const isShowInput = function (fullPath: pathType) {
         return (
             currentClick.length === fullPath.length &&
@@ -60,7 +63,7 @@ export function HtmlJson({jsonData, saveJson}: JsonProps) {
                 return (!isShowInput(path) &&
                     <div
                         key={JSON.stringify(path)}
-                        className='block mx-1 my-1 '
+                        className='block mx-3 my-1.5 '
                     >
                         {String(valueObj)}
                         {whatType(valueObj) !== 'object' &&
@@ -73,106 +76,136 @@ export function HtmlJson({jsonData, saveJson}: JsonProps) {
                 return returnHTML(valueObj, path)
         }
     }
+    const renderInputEl = function (valueObj: fileType , path: pathType) {
+        return (whatType(valueObj) !== 'object' && isShowInput(path) &&
+            <div
+                key="divInput"
+                className='my-1 flex'
+            >
+                <input
+                    key="input"
+                    type="text"
+                    className='cast-input'
+                    value={String(valueObj)}
+                    autoFocus
+                    onChange={(event) => {
+                        changeHandler(event, path)
+                    }}
+                />
+                <button
+                    className={classButton}
+                    onClick={(event) => {
+                        event.stopPropagation()
+                        setCurrentClick(pathNull)
+                        saveJson()
+                    }}
+                >
+                    &#10003;
+                </button>
+                <button
+                    className={classButton}
+                    onClick={(event) => {
+                        event.stopPropagation()
+                        setCurrentClick(pathNull)
+                        cancelChangeJson()
+                    }}
+                >
+                    &#10008;
+                </button>
+            </div>)
+    }
+    const renderClickDivElValue = function (valueObj: fileType, path: pathType) {
+        return (
+            <div
+                className={['my-2', whatType(valueObj) === 'object' || whatType(valueObj) === 'array' ? '' : 'cursor-pointer bg-green-50'].join(' ')}
+                onClick={(event) => {
+                    event.stopPropagation()
+                    if (whatType(valueObj) === 'object' || whatType(valueObj) === 'array') return
+                    setCurrentClick(path)
+                }}
+            >
+                {renderValueObj(valueObj, path)}
+                {renderInputEl(valueObj, path)}
+            </div>
+        )
+    }
     const returnHTML = function (jsonObj: fileType, path: pathType) {
         if (jsonObj instanceof Array) {
             return (
-                <div>
-                    [{ jsonObj.map((obj: object, index) =>
-                        (
-                            <div
-                                key={JSON.stringify(obj)+String(path)}
-                                className='h10 mb-4 pl-2 flex flex-row'
-                            >
-                                {returnHTML(obj, path.concat([index]))}
-                                <div>&sbquo;</div>
-                            </div>
+                <div className='brackets'>
+                    &#91;
+                    <div className='pl-6'>
+                        { jsonObj.map((obj: object, index) =>
+                            (
+                                <div
+                                    key={JSON.stringify(obj)+String(path)}
+                                    className='h10 mb-4 pl-2 flex flex-row'
+                                >
+                                    {returnHTML(obj, path.concat([index]))}
+                                    {(index < jsonObj.length - 1) && <div className={'comma mt-auto text-2xl'}>
+                                        &#8218;
+                                    </div>}
+                                </div>
 
-                        )
-                    )}]
+                            )
+                        )}
+                    </div>
+                    &#93;
                 </div>
 
             )
         } else if (whatType(jsonObj) === 'object') {
             return (
-                <div>&#123;
-                    {Object.entries(jsonObj).map(([keyObj, valueObj]) => {
-                            let keyEl: string = keyObj + JSON.stringify(valueObj)
-                            const fullPath = path.concat([keyObj])
-                            return (
-                                <div
-                                    className='flex flex-row'
-                                    key={keyEl}
-                                >
+                <div className='curly-brace'>
+                    &#123;
+                    <div className='pl-6'>
+                        {Object.entries(jsonObj).map(([keyObj, valueObj], index) => {
+                                let keyEl: string = keyObj + JSON.stringify(valueObj)
+                                const fullPath = path.concat([keyObj])
+                                const lengthObj: number = Object.keys(jsonObj).length
+                                return (
                                     <div
-                                        className={['my-2', whatType(valueObj) === 'object' ? 'py-2' : ''].join(' ')}
+                                        className='flex flex-row'
+                                        key={keyEl}
                                     >
-                                        {keyObj}
+                                        <div
+                                            className={['my-2', whatType(valueObj) === 'object' || whatType(valueObj) === 'array' ? '' : 'py-1'].join(' ')}
+                                        >
+                                            {keyObj}
+                                        </div>
+                                        <p
+                                            className={['mr-2 my-2', whatType(valueObj) === 'object' || whatType(valueObj) === 'array' ? '' : 'py-1'].join(' ')}
+                                        >
+                                            :
+                                        </p>
+                                        {renderClickDivElValue(valueObj, fullPath)}
+                                        {(index < lengthObj - 1) && <p
+                                            className={['comma mr-2 my-2 text-2xl mt-auto', whatType(valueObj) === 'object' || whatType(valueObj) === 'array' ? '' : 'py-1'].join(' ')}
+                                        >
+                                            &#8218;
+                                        </p>}
                                     </div>
-                                    <p
-                                        className={['mr-2 my-2', whatType(valueObj) === 'object' ? 'py-2' : ''].join(' ')}
-                                    >
-                                        :
-                                    </p>
-                                    <div
-                                        className={['py-2', whatType(valueObj) === 'object' || whatType(valueObj) === 'array' ? '' : 'cursor-pointer'].join(' ')}
-                                        onClick={(event) => {
-                                            event.stopPropagation()
-                                            if (whatType(valueObj) === 'object' || whatType(valueObj) === 'array') return
-                                            setCurrentClick(fullPath)
-                                        }}
-                                    >
-                                        {renderValueObj(valueObj, fullPath)}
-                                        {whatType(valueObj) !== 'object' && isShowInput(fullPath) &&
-                                            <div
-                                                key="divInput"
-                                                className='my-1 flex'
-                                            >
-                                                <input
-                                                    key="input"
-                                                    type="text"
-                                                    className='cast-input'
-                                                    value={valueObj}
-                                                    autoFocus
-                                                    onChange={(event) => {
-                                                        changeHandler(event, fullPath)
-                                                    }}
-                                                />
-                                                <button
-                                                    className={classButton}
-                                                    onClick={(event) => {
-                                                        event.stopPropagation()
-                                                        setCurrentClick([])
-                                                    }}
-                                                >
-                                                    &#10003;
-                                                </button>
-                                                <button
-                                                    className={classButton}
-                                                    onClick={(event) => {
-                                                        event.stopPropagation()
-                                                        setCurrentClick([])
-                                                    }}
-                                                >
-                                                    &#10008;
-                                                </button>
-                                            </div>}
-                                    </div>
-                                </div>
-                            )
-                        }
-                    )}
+                                )
+                            }
+                        )}
+                    </div>
                     &#125;
                 </div>
             )
         } else {
-            return renderValueObj(jsonObj, path)
+            return renderClickDivElValue(jsonObj, path)
         }
 
     }
     return (
         <>
+            <div
+            onClick={()=>{
+                console.log(jsonDataBuffer)}}>
+                JSON
+            </div>
             {
-                returnHTML(jsonData, [])
+                returnHTML(jsonData, pathNull)
             }
         </>
     )

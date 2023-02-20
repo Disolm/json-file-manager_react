@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 type fileType = object[] | object
 
@@ -44,15 +44,18 @@ export function useJsonData() {
                 "Radiation blast"
             ]
         }])
-    const saveJson = function (jsonOld: fileType) {
+    const [jsonDataBuffer, setJsonDataBuffer] = useState<fileType>([])
+    const saveJson = function () {
+        setJsonDataBuffer(jsonData)
+    }
+    const changeJson = function (jsonOld: fileType){
         setJsonData(jsonOld)
     }
-    const [jsonData2, setJsonData2] = useState<fileType>([
-        {
-            "name": "Madame Uppercut",
-        }])
-    const saveJson2 = function (jsonOld: fileType) {
-        setJsonData2(jsonOld)
+    const cancelChangeJson = function () {
+        setJsonData(jsonDataBuffer)
     }
-    return {jsonData, saveJson, jsonData2, saveJson2}
+    useEffect(() =>{
+        saveJson()
+    },[])
+    return {jsonData, jsonDataBuffer, saveJson, changeJson, cancelChangeJson}
 }

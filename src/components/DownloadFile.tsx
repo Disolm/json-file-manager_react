@@ -1,9 +1,10 @@
 import React from "react";
 
 interface JsonProps {
-    saveJson: (jsonData: object[] | object) => void
+    saveJson: () => void
+    changeJson: (jsonData: object[] | object) => void
 }
-export function DownloadFile({saveJson}: JsonProps) {
+export function DownloadFile({saveJson, changeJson}: JsonProps) {
     const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!event.currentTarget.files) return;
         let file = event.currentTarget.files[0]
@@ -13,7 +14,8 @@ export function DownloadFile({saveJson}: JsonProps) {
             const jsonText: string | ArrayBuffer | null = reader.result
             if (typeof jsonText === "string") {
                 const json = JSON.parse(jsonText)
-                saveJson(json)
+                changeJson(json)
+                saveJson()
             }
         }
         reader.onerror = function () {
