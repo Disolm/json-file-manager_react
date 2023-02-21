@@ -122,6 +122,9 @@ export function HtmlJson({jsonData, jsonDataBuffer, saveJson, changeJson, cancel
                     event.stopPropagation()
                     if (whatType(valueObj) === 'object' || whatType(valueObj) === 'array') return
                     setCurrentClick(path)
+                    if (!currentClick.length) {
+                        saveJson()
+                    }
                 }}
             >
                 {renderValueObj(valueObj, path)}
@@ -146,7 +149,6 @@ export function HtmlJson({jsonData, jsonDataBuffer, saveJson, changeJson, cancel
                                         &#8218;
                                     </div>}
                                 </div>
-
                             )
                         )}
                     </div>
