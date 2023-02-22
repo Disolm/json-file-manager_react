@@ -62,7 +62,7 @@ export function HtmlJson({jsonData, jsonDataBuffer, saveJson, changeJson, cancel
             case 'null':
                 return (!isShowInput(path) &&
                     <div
-                        key={JSON.stringify(path)}
+                        key={path.join('-')+String(valueObj)}
                         className='block mx-3 my-1.5 '
                     >
                         {String(valueObj)}
@@ -141,7 +141,7 @@ export function HtmlJson({jsonData, jsonDataBuffer, saveJson, changeJson, cancel
                         { jsonObj.map((obj: object, index) =>
                             (
                                 <div
-                                    key={JSON.stringify(obj)+String(path)}
+                                    key={JSON.stringify(obj || String(obj))+path.join('_') + index}
                                     className='h10 mb-4 pl-2 flex flex-row'
                                 >
                                     {returnHTML(obj, path.concat([index]))}
@@ -203,8 +203,10 @@ export function HtmlJson({jsonData, jsonDataBuffer, saveJson, changeJson, cancel
         <>
             <div
             onClick={()=>{
-                console.log(jsonDataBuffer)}}>
-                JSON
+                console.log(jsonData)}
+            }
+            >
+                Вывести в консоль JSON
             </div>
             {
                 returnHTML(jsonData, pathNull)
