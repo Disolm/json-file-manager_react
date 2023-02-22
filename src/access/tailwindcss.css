@@ -35,7 +35,7 @@
         focus:outline-none
         focus:ring-0
         focus:border-gray-200
-        focus:bg-blue-700
+        focus:bg-blue-500
     }
     .cast-input {
         @apply bg-blue-50 border mx-1

@@ -1,0 +1,9 @@
+{
+  "object": "object",
+  "array": "array",
+  "null": "null",
+  "number": "number",
+  "boolean": "boolean",
+  "string": "string",
+  "undefined": "undefined"
+}

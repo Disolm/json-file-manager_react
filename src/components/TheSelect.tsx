@@ -1,50 +1,90 @@
 import React, {useState} from "react";
 import {ITypeOption} from "../types";
+import types from "../access/types.json"
 
-export function TheSelect() {
+interface SelectProps {
+    typeValueInput: string
+    value: string
+    optionType: (event: string) => void
+}
+export function TheSelect({typeValueInput, value, optionType}:SelectProps) {
     const options: Array<ITypeOption> = [
         {
-            id: 0,
-            type: 'Object',
-            name: 'Объект'
+            type: types.string,
+            name: 'String'
         },
         {
-            id: 1,
-            type: 'Array',
-            name: 'Массив'
+            type: types.number,
+            name: 'Number'
         },
         {
-            id: 2,
-            type: 'String',
-            name: 'Строка'
+            type: types.null,
+            name: 'Null'
         },
         {
-            id: 3,
-            type: 'Number',
-            name: 'Число'
-        }
+            type: types.boolean,
+            name: 'boolean'
+        },
+        // {
+        //     type: types.object,
+        //     name: 'Object'
+        // },
+        // {
+        //     type: types.array,
+        //     name: 'Array'
+        // },
     ]
-    const [valueSelect, setValueSelect] = useState(options[0].name)
+    const whatSelectDefault = function (type: string) {
+        let name:string = ''
+        options.forEach((option)=>{
+            if (type === option.type) {
+                name = option.name
+            }
+        })
+        return name
+    }
+
+    const isDisabled = function (option: ITypeOption) {
+        if (option.type === 'string') {
+            return false
+        }
+        if (!Number.isNaN(+value) && option.type === types.number) {
+            return false
+        }
+        if (value === types.null && option.type === types.null){
+            return false
+        }
+        return !((value === 'true' || value === 'false') && option.type === types.boolean);
+    }
+    const [valueSelect, setValueSelect] = useState<string>(whatSelectDefault(typeValueInput))
     const changeHandler = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setValueSelect(event.target.value)
+        options.forEach((option)=>{
+            if (event.target.value === option.name) {
+                optionType(option.type)
+            }
+        })
     }
     return (
         <>
-            <form className=''>
+            <form className='w-full'>
                 <select
-                    className='cast-option'
+                    name='typeValueObj'
+                    id="typeValueObj-select"
+                    className='cast-option mx-1 px-3 min-w-max'
                     multiple={false}
                     onChange={changeHandler}
+                    value={valueSelect}
                 >
-                    {options.map(option =>
+                    {options.map((option, idx) =>
                         <option
-                            value={`${option.type}`}
-                            key={`${option.id}`}
+                            value={option.name}
+                            key={idx}
+                            disabled={isDisabled(option)}
                         >
                             {option.name}
                         </option>
                     )}
-
                 </select>
             </form>
         </>

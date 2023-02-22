@@ -1,4 +1,6 @@
 import React, {useState} from "react";
+import {TheSelect} from "./TheSelect";
+import types from "../access/types.json"
 
 type fileType = string | boolean | object[] | object | number
 type jsonType = any
@@ -8,43 +10,72 @@ type JSONValue = string | number | boolean | { [x: string]: JSONValue } | JSONVa
 
 interface JsonProps {
     jsonData: jsonType
-    jsonDataBuffer: jsonType
-    saveJson: () => void
-    changeJson: (jsonData: object | object[]) => void
-    cancelChangeJson: () => void
+    saveJsonFun: () => void
+    changeJsonFun: (jsonData: object | object[]) => void
+    cancelChangeJsonFun: () => void
 }
 
-export function HtmlJson({jsonData, jsonDataBuffer, saveJson, changeJson, cancelChangeJson}: JsonProps) {
-    const classButton: string = 'w-full mx-1 px-2 border border-blue-600 bg-white rounded active:bg-blue-200'
+export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJsonFun}: JsonProps) {
+    const classButton: string = 'mx-1 px-3 border border-blue-600 bg-white rounded active:bg-blue-200'
     const pathNull: [] = []
+    const [selectedOptionType, setSelectedOptionType] = useState<string>(types.string)
+    const handleOptionType = function (event: string) {
+        setSelectedOptionType(event)
+    }
     const whatType = function (json: fileType) {
         if (Array.isArray(json)) {
-            return 'array'
+            return types.array
         } else if (json === null) {
-            return 'null'
+            return types.null
         } else {
             return typeof json
         }
     }
-
+    const typesSaveJson = function () {
+        if (whatType(jsonData) === types.object) {
+            changeJsonFun({...jsonData})
+        }
+        if (whatType(jsonData) === types.array) {
+            changeJsonFun([...jsonData])
+        }
+    }
     const changeHandler = function (event: React.ChangeEvent<HTMLInputElement>, fullPath: pathType) {
         let jsonChang: jsonType = jsonData
 
         fullPath.forEach((path) => {
-            if (whatType(jsonChang[path]) === 'object' || whatType(jsonChang[path]) === 'array') {
+            if (whatType(jsonChang[path]) === types.object || whatType(jsonChang[path]) === types.array) {
                 jsonChang = jsonChang[path]
             } else {
                 jsonChang[path] = event.target.value
-                if (whatType(jsonData) === 'object') {
-                    changeJson({...jsonData})
-                }
-                if (whatType(jsonData) === 'array') {
-                    changeJson([...jsonData])
-                }
+                typesSaveJson()
             }
         })
     }
+    const saveChangValue = function(fullPath: pathType) {
+        let jsonChang: jsonType = jsonData
 
+        fullPath.forEach((path) => {
+            if (whatType(jsonChang[path]) === types.object || whatType(jsonChang[path]) === types.array) {
+                jsonChang = jsonChang[path]
+            } else {
+                switch (selectedOptionType) {
+                    case types.number:
+                        jsonChang[path] = +jsonChang[path]
+                        break
+                    case types.null:
+                        jsonChang[path] = null
+                        break
+                    case types.boolean:
+                        jsonChang[path] = jsonChang[path] === 'true'
+                        break
+                    default:
+                        jsonChang[path] = jsonChang[path]
+                        break
+                }
+                typesSaveJson()
+            }
+        })
+    }
     const [currentClick, setCurrentClick] = useState<pathType>(pathNull)
     const isShowInput = function (fullPath: pathType) {
         return (
@@ -53,31 +84,31 @@ export function HtmlJson({jsonData, jsonDataBuffer, saveJson, changeJson, cancel
         )
     }
 
-    const renderValueObj = function (valueObj: fileType, path: pathType): any {
+    const renderValueObj = function (valueObj: fileType, path: pathType) {
         switch (whatType(valueObj)) {
-            case 'string':
-            case 'number':
-            case 'boolean':
-            case 'undefined':
-            case 'null':
+            case types.string:
+            case types.number:
+            case types.boolean:
+            case types.undefined:
+            case types.null:
                 return (!isShowInput(path) &&
                     <div
-                        key={path.join('-')+String(valueObj)}
+                        key={path.join('-') + String(valueObj)}
                         className='block mx-3 my-1.5 '
                     >
                         {String(valueObj)}
-                        {whatType(valueObj) !== 'object' &&
+                        {whatType(valueObj) !== types.object &&
                             <span className='text-black text-sm ml-4'>
                                 &#8592;{whatType(valueObj)}
                             </span>}
                     </div>)
-            case 'object':
-            case 'array':
+            case types.object:
+            case types.array:
                 return returnHTML(valueObj, path)
         }
     }
-    const renderInputEl = function (valueObj: fileType , path: pathType) {
-        return (whatType(valueObj) !== 'object' && isShowInput(path) &&
+    const renderInputEl = function (valueObj: fileType, path: pathType) {
+        return (whatType(valueObj) !== types.object && isShowInput(path) &&
             <div
                 key="divInput"
                 className='my-1 flex'
@@ -96,8 +127,9 @@ export function HtmlJson({jsonData, jsonDataBuffer, saveJson, changeJson, cancel
                     className={classButton}
                     onClick={(event) => {
                         event.stopPropagation()
+                        saveChangValue(path)
+                        saveJsonFun()
                         setCurrentClick(pathNull)
-                        saveJson()
                     }}
                 >
                     &#10003;
@@ -106,25 +138,29 @@ export function HtmlJson({jsonData, jsonDataBuffer, saveJson, changeJson, cancel
                     className={classButton}
                     onClick={(event) => {
                         event.stopPropagation()
+                        cancelChangeJsonFun()
                         setCurrentClick(pathNull)
-                        cancelChangeJson()
                     }}
                 >
                     &#10008;
                 </button>
+                <TheSelect
+                    typeValueInput={whatType(valueObj)}
+                    value={String(valueObj)}
+                    optionType={handleOptionType}
+                />
             </div>)
     }
     const renderClickDivElValue = function (valueObj: fileType, path: pathType) {
         return (
             <div
-                className={['my-2', whatType(valueObj) === 'object' || whatType(valueObj) === 'array' ? '' : 'cursor-pointer bg-green-50'].join(' ')}
+                className={['my-2', whatType(valueObj) === types.object || whatType(valueObj) === types.array ? '' : 'cursor-pointer bg-green-50'].join(' ')}
                 onClick={(event) => {
                     event.stopPropagation()
-                    if (whatType(valueObj) === 'object' || whatType(valueObj) === 'array') return
+                    if (currentClick.length) return
+                    if (whatType(valueObj) === types.object || whatType(valueObj) === types.array) return
                     setCurrentClick(path)
-                    if (!currentClick.length) {
-                        saveJson()
-                    }
+                    saveJsonFun()
                 }}
             >
                 {renderValueObj(valueObj, path)}
@@ -137,11 +173,11 @@ export function HtmlJson({jsonData, jsonDataBuffer, saveJson, changeJson, cancel
             return (
                 <div className='brackets'>
                     &#91;
-                    <div className='pl-6'>
-                        { jsonObj.map((obj: object, index) =>
+                    <div className='pl-6 w-full'>
+                        {jsonObj.map((obj: object, index) =>
                             (
                                 <div
-                                    key={JSON.stringify(obj || String(obj))+path.join('_') + index}
+                                    key={JSON.stringify(obj || String(obj)) + path.join('_') + index}
                                     className='h10 mb-4 pl-2 flex flex-row'
                                 >
                                     {returnHTML(obj, path.concat([index]))}
@@ -156,7 +192,7 @@ export function HtmlJson({jsonData, jsonDataBuffer, saveJson, changeJson, cancel
                 </div>
 
             )
-        } else if (whatType(jsonObj) === 'object') {
+        } else if (whatType(jsonObj) === types.object) {
             return (
                 <div className='curly-brace'>
                     &#123;
@@ -171,18 +207,18 @@ export function HtmlJson({jsonData, jsonDataBuffer, saveJson, changeJson, cancel
                                         key={keyEl}
                                     >
                                         <div
-                                            className={['my-2', whatType(valueObj) === 'object' || whatType(valueObj) === 'array' ? '' : 'py-1'].join(' ')}
+                                            className={['my-2', whatType(valueObj) === types.object || whatType(valueObj) === types.array ? '' : 'py-1'].join(' ')}
                                         >
                                             {keyObj}
                                         </div>
                                         <p
-                                            className={['mr-2 my-2', whatType(valueObj) === 'object' || whatType(valueObj) === 'array' ? '' : 'py-1'].join(' ')}
+                                            className={['mr-2 my-2', whatType(valueObj) === types.object || whatType(valueObj) === types.array ? '' : 'py-1'].join(' ')}
                                         >
                                             :
                                         </p>
                                         {renderClickDivElValue(valueObj, fullPath)}
                                         {(index < lengthObj - 1) && <p
-                                            className={['comma mr-2 my-2 text-2xl mt-auto', whatType(valueObj) === 'object' || whatType(valueObj) === 'array' ? '' : 'py-1'].join(' ')}
+                                            className={['comma mr-2 my-2 text-2xl mt-auto', whatType(valueObj) === types.object || whatType(valueObj) === types.array ? '' : 'py-1'].join(' ')}
                                         >
                                             &#8218;
                                         </p>}
@@ -200,17 +236,18 @@ export function HtmlJson({jsonData, jsonDataBuffer, saveJson, changeJson, cancel
 
     }
     return (
-        <>
+        <div className='HtmlJson'>
             <div
-            onClick={()=>{
-                console.log(jsonData)}
-            }
+                onClick={() => {
+                    console.log(jsonData)
+                }
+                }
             >
                 Вывести в консоль JSON
             </div>
             {
                 returnHTML(jsonData, pathNull)
             }
-        </>
+        </div>
     )
 }

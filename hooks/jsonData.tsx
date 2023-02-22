@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 type fileType = object[] | object
 
@@ -66,5 +66,14 @@ export function useJsonData() {
         const jsonObj:fileType = JSON.parse(jsonText)
         await setJsonData(jsonObj)
     }
-    return {jsonData, jsonDataBuffer, saveJson, changeJson, cancelChangeJson}
+    useEffect(()=> {
+        const jsonText: string = JSON.stringify(jsonData,
+            (key, value) => {
+                return value === undefined ? "undefined" : value
+            }
+        )
+        const jsonObj:fileType = JSON.parse(jsonText)
+        setJsonDataBuffer(jsonObj)
+    },[])
+    return {jsonData, saveJson, changeJson, cancelChangeJson}
 }
