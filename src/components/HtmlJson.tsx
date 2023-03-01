@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 import {TheSelect} from "./TheSelect";
 import types from "../access/types.json"
 
@@ -19,6 +19,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
     const classButton: string = 'mx-1 px-3 border border-blue-600 bg-white rounded active:bg-blue-200'
     const pathNull: [] = []
     const [selectedOptionType, setSelectedOptionType] = useState<string>(types.string)
+    const thisIsKey = useRef<boolean>(true)
     const handleOptionType = function (event: string) {
         setSelectedOptionType(event)
     }
@@ -40,18 +41,36 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
         }
     }
     const changeHandler = function (event: React.ChangeEvent<HTMLInputElement>, fullPath: pathType) {
+        const pathLength: number = fullPath.length - 1
         let jsonChang: jsonType = jsonData
-
-        fullPath.forEach((path) => {
-            if (whatType(jsonChang[path]) === types.object || whatType(jsonChang[path]) === types.array) {
-                jsonChang = jsonChang[path]
+        fullPath.forEach((path, index) => {
+            if (thisIsKey.current) {
+                if (index < (pathLength - 1)) {
+                    jsonChang = jsonChang[path]
+                } else if (index === (pathLength - 1)){
+                    const ArrKeyValueObj = Object.entries(jsonChang[fullPath[pathLength - 1]])
+                    ArrKeyValueObj.map((Arrays) => {
+                        if (Arrays[0] === fullPath[fullPath.length - 1]) {
+                            Arrays[0] = event.target.value
+                        }
+                        return [Arrays[0],Arrays[1]]
+                    })
+                    jsonChang[fullPath[pathLength - 1]] = Object.fromEntries(ArrKeyValueObj)
+                    fullPath[pathLength] = event.target.value
+                    setCurrentClick(fullPath)
+                    typesSaveJson()
+                }
             } else {
-                jsonChang[path] = event.target.value
-                typesSaveJson()
+                if (whatType(jsonChang[path]) === types.object || whatType(jsonChang[path]) === types.array) {
+                        jsonChang = jsonChang[path]
+                } else {
+                        jsonChang[path] = event.target.value
+                        typesSaveJson()
+                }
             }
         })
     }
-    const saveChangValue = function(fullPath: pathType) {
+    const saveChangValue = function (fullPath: pathType) {
         let jsonChang: jsonType = jsonData
 
         fullPath.forEach((path) => {
@@ -72,7 +91,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                         jsonChang[path] = jsonChang[path]
                         break
                 }
-                typesSaveJson()
+                changeJsonFun(jsonData)
             }
         })
     }
@@ -83,7 +102,29 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             currentClick.every((value, index) => value === fullPath[index])
         )
     }
-
+    const renderClickDivElKey = function (keyObj: string, valueObj: fileType, path: pathType) {
+        return (
+            <div
+                className={[whatType(valueObj) === types.object || whatType(valueObj) === types.array ? 'py-2' : 'py-3', 'cursor-pointer bg-green-50 mb-auto'].join(' ')}
+                onClick={(event) => {
+                    event.stopPropagation()
+                    if (currentClick.length) return
+                    thisIsKey.current = true
+                    setCurrentClick(path)
+                    saveJsonFun()
+                }}
+            >
+                {
+                    (thisIsKey.current ? !isShowInput(path) : true) &&
+                    <div>{keyObj}</div>
+                }
+                {
+                    isShowInput(path) && thisIsKey.current &&
+                    renderInputEl(keyObj, path)
+                }
+            </div>
+        )
+    }
     const renderValueObj = function (valueObj: fileType, path: pathType) {
         switch (whatType(valueObj)) {
             case types.string:
@@ -91,7 +132,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             case types.boolean:
             case types.undefined:
             case types.null:
-                return (!isShowInput(path) &&
+                return (
                     <div
                         key={path.join('-') + String(valueObj)}
                         className='block mx-3 my-1.5 '
@@ -107,8 +148,8 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                 return returnHTML(valueObj, path)
         }
     }
-    const renderInputEl = function (valueObj: fileType, path: pathType) {
-        return (whatType(valueObj) !== types.object && isShowInput(path) &&
+    const renderInputEl = function (value: fileType, path: pathType) {
+        return (whatType(value) !== types.object &&
             <div
                 key="divInput"
                 className='my-1 flex'
@@ -117,7 +158,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                     key="input"
                     type="text"
                     className='cast-input'
-                    value={String(valueObj)}
+                    value={String(value)}
                     autoFocus
                     onChange={(event) => {
                         changeHandler(event, path)
@@ -129,6 +170,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                         event.stopPropagation()
                         saveChangValue(path)
                         saveJsonFun()
+                        thisIsKey.current = true
                         setCurrentClick(pathNull)
                     }}
                 >
@@ -139,16 +181,18 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                     onClick={(event) => {
                         event.stopPropagation()
                         cancelChangeJsonFun()
+                        thisIsKey.current = true
                         setCurrentClick(pathNull)
                     }}
                 >
                     &#10008;
                 </button>
-                <TheSelect
-                    typeValueInput={whatType(valueObj)}
-                    value={String(valueObj)}
-                    optionType={handleOptionType}
-                />
+                {!thisIsKey.current &&
+                    <TheSelect
+                        typeValueInput={whatType(value)}
+                        value={String(value)}
+                        optionType={handleOptionType}
+                    />}
             </div>)
     }
     const renderClickDivElValue = function (valueObj: fileType, path: pathType) {
@@ -159,12 +203,13 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                     event.stopPropagation()
                     if (currentClick.length) return
                     if (whatType(valueObj) === types.object || whatType(valueObj) === types.array) return
+                    thisIsKey.current = false
                     setCurrentClick(path)
                     saveJsonFun()
                 }}
             >
-                {renderValueObj(valueObj, path)}
-                {renderInputEl(valueObj, path)}
+                {(!isShowInput(path) || thisIsKey.current) && renderValueObj(valueObj, path)}
+                {!thisIsKey.current && isShowInput(path) && renderInputEl(valueObj, path)}
             </div>
         )
     }
@@ -206,11 +251,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                                         className='flex flex-row'
                                         key={keyEl}
                                     >
-                                        <div
-                                            className={['my-2', whatType(valueObj) === types.object || whatType(valueObj) === types.array ? '' : 'py-1'].join(' ')}
-                                        >
-                                            {keyObj}
-                                        </div>
+                                        {renderClickDivElKey(keyObj, valueObj, fullPath)}
                                         <p
                                             className={['mr-2 my-2', whatType(valueObj) === types.object || whatType(valueObj) === types.array ? '' : 'py-1'].join(' ')}
                                         >

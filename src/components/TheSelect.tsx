@@ -25,14 +25,14 @@ export function TheSelect({typeValueInput, value, optionType}:SelectProps) {
             type: types.boolean,
             name: 'boolean'
         },
-        // {
-        //     type: types.object,
-        //     name: 'Object'
-        // },
-        // {
-        //     type: types.array,
-        //     name: 'Array'
-        // },
+        {
+            type: types.object,
+            name: 'Object'
+        },
+        {
+            type: types.array,
+            name: 'Array'
+        },
     ]
     const whatSelectDefault = function (type: string) {
         let name:string = ''
