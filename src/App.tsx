@@ -3,7 +3,7 @@ import React from "react";
 import {DownloadFile} from "./components/DownloadFile";
 import {UploadFile} from "./components/UploadFile";
 import {HtmlJson} from "./components/HtmlJson";
-import {useJsonData} from "./hooks/jsonData";
+import {useJsonData} from "../hooks/jsonData";
 
 export function App() {
     const {jsonData, saveJson, changeJson, cancelChangeJson} = useJsonData()
