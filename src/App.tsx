@@ -18,7 +18,7 @@ export function App() {
             </div>
             <div className='h-0.5 my-1 w-full bg-blue-900'/>
             <div
-                className='p-4 font-medium text-blue-600 bg-white'
+                className='p-4 font-medium text-blue-600 bg-white max-w-screen-xl'
             >
                 <HtmlJson
                     jsonData = {jsonData}

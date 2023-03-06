@@ -45,7 +45,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             changeJsonFun([...jsonData])
         }
     }
-    const changeHandler = function (event: React.ChangeEvent<HTMLInputElement>, fullPath: pathType) {
+    const renameKeyAndValue = function (event: React.ChangeEvent<HTMLInputElement>, fullPath: pathType) {
         const pathLength: number = fullPath.length - 1
         let jsonChang: jsonType = jsonData
         fullPath.forEach((path, index) => {
@@ -100,6 +100,46 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             }
         })
     }
+    const arraySwap = function (fullPath: pathType, leftOrRight: string) {
+        let jsonChang: jsonType = jsonData
+        fullPath.forEach((path, index) => {
+            if (index < (fullPath.length - 1)) {
+                jsonChang = jsonChang[path]
+            } else if (whatType(path) === types.number) {
+                if (leftOrRight === 'left') {
+                    const temp = jsonChang[+path - 1]
+                    jsonChang[+path - 1] = jsonChang[+path]
+                    jsonChang[path] = temp
+                    typesSaveJson()
+                }
+                if (leftOrRight === 'right') {
+                    const temp = jsonChang[+path + 1]
+                    jsonChang[+path + 1] = jsonChang[+path]
+                    jsonChang[path] = temp
+                    typesSaveJson()
+                }
+            }
+        })
+    }
+    const addToJson = function (fullPath: pathType) {
+        console.log('addToJson', fullPath)
+    }
+    const removeFromJson = function (fullPath: pathType) {
+        let jsonChang: jsonType = jsonData
+        fullPath.forEach((path, index) => {
+            if (index < (fullPath.length - 1)) {
+                jsonChang = jsonChang[path]
+            } else {
+                if (whatType(jsonChang) === types.object) {
+                    delete jsonChang[path]
+                }
+                if (whatType(jsonChang) === types.array) {
+                    jsonChang.splice(path, 1)
+                }
+                typesSaveJson()
+            }
+        })
+    }
     const [currentClick, setCurrentClick] = useState<pathType>(pathNull)
     const isShowInput = function (fullPath: pathType) {
         return (
@@ -110,7 +150,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
     const renderClickDivElKey = function (keyObj: string, valueObj: fileType, path: pathType) {
         return (
             <div
-                className={[whatType(valueObj) === types.object ||
+                className={['renderClickDivElKey', whatType(valueObj) === types.object ||
                 whatType(valueObj) === types.array ?
                     'mt-1' : 'mt-2', 'pb-1 cursor-pointer bg-blue-50 mb-auto rounded'].join(' ')}
                 onClick={(event) => {
@@ -142,7 +182,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                 return (
                     <div
                         key={path.join('-') + String(valueObj)}
-                        className='block mx-3 my-1.5 '
+                        className='renderValueObj block mx-3 my-1.5 '
                     >
                         {String(valueObj)}
                         {whatType(valueObj) !== types.object &&
@@ -159,7 +199,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
         return (whatType(value) !== types.object &&
             <div
                 key="divInput"
-                className='mt-1 flex р-8'
+                className='renderInputEl mt-1 flex р-8'
             >
                 <input
                     key="input"
@@ -168,7 +208,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                     value={String(value)}
                     autoFocus
                     onChange={(event) => {
-                        changeHandler(event, path)
+                        renameKeyAndValue(event, path)
                     }}
                 />
                 <button
@@ -205,22 +245,38 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
     const renderClickDivElValue = function (valueObj: fileType, path: pathType) {
         return (
             <div
-                className={['my-2', whatType(valueObj) === types.object || whatType(valueObj) === types.array ? '' : 'cursor-pointer bg-green-50 rounded'].join(' ')}
-                onClick={(event) => {
-                    event.stopPropagation()
-                    if (currentClick.length) return
-                    if (whatType(valueObj) === types.object || whatType(valueObj) === types.array) return
-                    thisIsKey.current = false
-                    setCurrentClick(path)
-                    saveJsonFun()
-                }}
+            className={['renderClickDivElValue flex flex-row', (whatType(valueObj) === types.object || whatType(valueObj) === types.array) ? '' : classForTailwind('g')].join(' ')}
             >
-                {(!isShowInput(path) || thisIsKey.current) && renderValueObj(valueObj, path)}
-                {!thisIsKey.current && isShowInput(path) && renderInputEl(valueObj, path)}
+                <div
+                    className={['my-2', whatType(valueObj) === types.object || whatType(valueObj) === types.array ? '' : 'cursor-pointer bg-green-50 rounded'].join(' ')}
+                    onClick={(event) => {
+                        event.stopPropagation()
+                        if (currentClick.length) return
+                        if (whatType(valueObj) === types.object || whatType(valueObj) === types.array) return
+                        thisIsKey.current = false
+                        setCurrentClick(path)
+                        saveJsonFun()
+                    }}
+                >
+                    {(!isShowInput(path) || thisIsKey.current) &&
+                        renderValueObj(valueObj, path)
+                    }
+                    {!thisIsKey.current && isShowInput(path) &&
+                        renderInputEl(valueObj, path)
+                    }
+                </div>
+                {!(whatType(valueObj) === types.object || whatType(valueObj) === types.array) &&
+                    <div className={['mt-4 cursor-pointer ml-2 hover:bg-red-100 rounded relative top-0 h-6', classForTailwind('')].join(' ')}
+                         onClick={() => {
+                             removeFromJson(path)
+                         }}
+                    >
+                        &#128465;
+                    </div>}
             </div>
         )
     }
-    const classForTail = function (group: string) {
+    const classForTailwind = function (group: string) {
         if (CSSGroupIndex.current === (CSSGroup.length - 1)) {
             CSSGroupIndex.current = 0
         }
@@ -234,7 +290,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
     const returnHTML = function (jsonObj: fileType, path: pathType) {
         if (jsonObj instanceof Array) {
             return (
-                <div className='brackets'>
+                <div className='returnHTML__brackets'>
                     <div className='text-xl'>
                         &#91;
                     </div>
@@ -243,13 +299,15 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                             (
                                 <div
                                     key={path.join('_') + index}
-                                    className={['array h10 flex flex-row', classForTail('g')].join(' ')}
+                                    className={['array h10 flex flex-row', classForTailwind('g')].join(' ')}
                                 >
                                     <TheSwapVertical
                                         jsonObj={jsonObj}
                                         index={index}
+                                        swapFun={arraySwap}
+                                        path={path.concat([index])}
                                         classNameStr={[(whatType(obj)===types.object ||
-                                            whatType(obj)===types.array) ? '' : 'my-auto', classForTail('')].join(' ')}
+                                            whatType(obj)===types.array) ? '' : 'my-auto', classForTailwind('')].join(' ')}
                                     />
                                     {
                                         returnHTML(obj, path.concat([index]))
@@ -263,7 +321,11 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                     </div>
                     <div className='flex flex-row text-xl'>
                         &#93;
-                        <TheHellipHorizontal/>
+                        <TheHellipHorizontal
+                            addObjectInJson={() => addToJson(path)}
+                            removeObjectInJson={() => removeFromJson(path)}
+                            path={path}
+                        />
                     </div>
 
                 </div>
@@ -271,7 +333,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             )
         } else if (whatType(jsonObj) === types.object) {
             return (
-                <div className='curly-brace'>
+                <div className='returnHTML__curly-brace'>
                     <div className='text-xl'>
                         &#123;
                     </div>
@@ -306,9 +368,13 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                             }
                         )}
                     </div>
-                    <div className='flex flex-row text-xl'>
+                    <div className='returnHTML__any flex flex-row text-xl'>
                         &#125;
-                        <TheHellipHorizontal/>
+                        <TheHellipHorizontal
+                            addObjectInJson={() => addToJson(path)}
+                            removeObjectInJson={() => removeFromJson(path)}
+                            path={path}
+                        />
                     </div>
                 </div>
             )
@@ -320,10 +386,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
     return (
         <div className='HtmlJson'>
             <div
-                onClick={() => {
-                    console.log(jsonData)
-                }
-                }
+                onClick={() => {console.log(jsonData)}}
             >
                 Вывести в консоль JSON
             </div>
