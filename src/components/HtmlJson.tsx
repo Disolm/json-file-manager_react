@@ -1,6 +1,9 @@
 import React, {useRef, useState} from "react";
 import {TheSelect} from "./TheSelect";
 import types from "../access/types.json"
+import {TheHellipHorizontal} from "./TheHellipHorizontal";
+import {TheSwapVertical} from "./TheSwapVertical";
+import CSSGroup from "../CSSForArray";
 
 type fileType = string | boolean | object[] | object | number
 type jsonType = any
@@ -17,9 +20,11 @@ interface JsonProps {
 
 export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJsonFun}: JsonProps) {
     const classButton: string = 'mx-1 px-3 border border-blue-600 bg-white rounded active:bg-blue-200'
+    const classHoverObjAndArr: string = 'hover:border-l-4 hover:border-blue-100 border-solid border-white border-l-4'
     const pathNull: [] = []
     const [selectedOptionType, setSelectedOptionType] = useState<string>(types.string)
     const thisIsKey = useRef<boolean>(true)
+    const CSSGroupIndex = useRef<number>(0)
     const handleOptionType = function (event: string) {
         setSelectedOptionType(event)
     }
@@ -105,7 +110,9 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
     const renderClickDivElKey = function (keyObj: string, valueObj: fileType, path: pathType) {
         return (
             <div
-                className={[whatType(valueObj) === types.object || whatType(valueObj) === types.array ? 'py-2' : 'py-3', 'cursor-pointer bg-green-50 mb-auto'].join(' ')}
+                className={[whatType(valueObj) === types.object ||
+                whatType(valueObj) === types.array ?
+                    'mt-1' : 'mt-2', 'pb-1 cursor-pointer bg-blue-50 mb-auto rounded'].join(' ')}
                 onClick={(event) => {
                     event.stopPropagation()
                     if (currentClick.length) return
@@ -116,7 +123,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             >
                 {
                     (thisIsKey.current ? !isShowInput(path) : true) &&
-                    <div>{keyObj}</div>
+                    <div className='h-8 ml-3 mr-1 pt-1'>{keyObj}</div>
                 }
                 {
                     isShowInput(path) && thisIsKey.current &&
@@ -152,7 +159,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
         return (whatType(value) !== types.object &&
             <div
                 key="divInput"
-                className='my-1 flex'
+                className='mt-1 flex р-8'
             >
                 <input
                     key="input"
@@ -198,7 +205,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
     const renderClickDivElValue = function (valueObj: fileType, path: pathType) {
         return (
             <div
-                className={['my-2', whatType(valueObj) === types.object || whatType(valueObj) === types.array ? '' : 'cursor-pointer bg-green-50'].join(' ')}
+                className={['my-2', whatType(valueObj) === types.object || whatType(valueObj) === types.array ? '' : 'cursor-pointer bg-green-50 rounded'].join(' ')}
                 onClick={(event) => {
                     event.stopPropagation()
                     if (currentClick.length) return
@@ -213,19 +220,40 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             </div>
         )
     }
+    const classForTail = function (group: string) {
+        if (CSSGroupIndex.current === (CSSGroup.length - 1)) {
+            CSSGroupIndex.current = 0
+        }
+        if (group === 'g') {
+            return CSSGroup[CSSGroupIndex.current].group
+        } else {
+            CSSGroupIndex.current++
+            return CSSGroup[CSSGroupIndex.current - 1].groupHover
+        }
+    }
     const returnHTML = function (jsonObj: fileType, path: pathType) {
         if (jsonObj instanceof Array) {
             return (
                 <div className='brackets'>
-                    &#91;
-                    <div className='pl-6 w-full'>
+                    <div className='text-xl'>
+                        &#91;
+                    </div>
+                    <div className={['pl-6 w-full', classHoverObjAndArr].join(' ')}>
                         {jsonObj.map((obj: object, index) =>
                             (
                                 <div
-                                    key={JSON.stringify(obj || String(obj)) + path.join('_') + index}
-                                    className='h10 mb-4 pl-2 flex flex-row'
+                                    key={path.join('_') + index}
+                                    className={['array h10 flex flex-row', classForTail('g')].join(' ')}
                                 >
-                                    {returnHTML(obj, path.concat([index]))}
+                                    <TheSwapVertical
+                                        jsonObj={jsonObj}
+                                        index={index}
+                                        classNameStr={[(whatType(obj)===types.object ||
+                                            whatType(obj)===types.array) ? '' : 'my-auto', classForTail('')].join(' ')}
+                                    />
+                                    {
+                                        returnHTML(obj, path.concat([index]))
+                                    }
                                     {(index < jsonObj.length - 1) && <div className={'comma mt-auto text-2xl'}>
                                         &#8218;
                                     </div>}
@@ -233,31 +261,41 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                             )
                         )}
                     </div>
-                    &#93;
+                    <div className='flex flex-row text-xl'>
+                        &#93;
+                        <TheHellipHorizontal/>
+                    </div>
+
                 </div>
 
             )
         } else if (whatType(jsonObj) === types.object) {
             return (
                 <div className='curly-brace'>
-                    &#123;
-                    <div className='pl-6'>
+                    <div className='text-xl'>
+                        &#123;
+                    </div>
+                    <div className={['pl-6', classHoverObjAndArr].join(' ')}>
                         {Object.entries(jsonObj).map(([keyObj, valueObj], index) => {
                                 let keyEl: string = keyObj + JSON.stringify(valueObj)
                                 const fullPath = path.concat([keyObj])
                                 const lengthObj: number = Object.keys(jsonObj).length
                                 return (
                                     <div
-                                        className='flex flex-row'
+                                        className='object flex flex-row'
                                         key={keyEl}
                                     >
-                                        {renderClickDivElKey(keyObj, valueObj, fullPath)}
+                                        {
+                                            renderClickDivElKey(keyObj, valueObj, fullPath)
+                                        }
                                         <p
                                             className={['mr-2 my-2', whatType(valueObj) === types.object || whatType(valueObj) === types.array ? '' : 'py-1'].join(' ')}
                                         >
                                             :
                                         </p>
-                                        {renderClickDivElValue(valueObj, fullPath)}
+                                        {
+                                            renderClickDivElValue(valueObj, fullPath)
+                                        }
                                         {(index < lengthObj - 1) && <p
                                             className={['comma mr-2 my-2 text-2xl mt-auto', whatType(valueObj) === types.object || whatType(valueObj) === types.array ? '' : 'py-1'].join(' ')}
                                         >
@@ -268,7 +306,10 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                             }
                         )}
                     </div>
-                    &#125;
+                    <div className='flex flex-row text-xl'>
+                        &#125;
+                        <TheHellipHorizontal/>
+                    </div>
                 </div>
             )
         } else {

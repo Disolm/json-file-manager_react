@@ -25,7 +25,7 @@
 
     .cast-option {
         @apply font-medium
-        w-full h-10
+        w-full h-8
         text-white
         px-2
         bg-blue-600
@@ -39,6 +39,7 @@
     }
     .cast-input {
         @apply bg-blue-50 border mx-1
+        h-8
         text-blue-600 rounded-lg block px-2
         font-medium border-blue-600
         focus:ring-blue-600
@@ -71,5 +72,31 @@
     }
     .input-file__input {
         display: none;
+    }
+    .triangle-up {
+        margin-top: .4em;
+        margin-bottom: .2em;
+        @apply
+        border-b-8
+        border-b-teal-300
+        hover:border-b-teal-600
+    }
+    .triangle-down,.triangle-up {
+        width: 0;
+        height: 0;
+        border-left: 12px solid transparent;
+        border-right: 12px solid transparent;
+        cursor: pointer;
+        margin-left: 0.2em;
+        margin-right: 0.2em;
+        @apply border-solid
+    }
+    .triangle-down {
+        margin-top: .2em;
+        margin-bottom: .4em;
+        @apply border-solid
+        border-t-8
+        border-t-teal-300
+        hover:border-t-teal-600
     }
 }
