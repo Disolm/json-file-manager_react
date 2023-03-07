@@ -20,14 +20,21 @@ interface JsonProps {
 
 export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJsonFun}: JsonProps) {
     const classButton: string = 'mx-1 px-3 border border-blue-600 bg-white rounded active:bg-blue-200'
+
     const classHoverObjAndArr: string = 'hover:border-l-4 hover:border-blue-100 border-solid border-white border-l-4'
+
     const pathNull: [] = []
+
     const [selectedOptionType, setSelectedOptionType] = useState<string>(types.string)
+
     const thisIsKey = useRef<boolean>(true)
+
     const CSSGroupIndex = useRef<number>(0)
+
     const handleOptionType = function (event: string) {
         setSelectedOptionType(event)
     }
+
     const whatType = function (json: fileType) {
         if (Array.isArray(json)) {
             return types.array
@@ -37,6 +44,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             return typeof json
         }
     }
+
     const typesSaveJson = function () {
         if (whatType(jsonData) === types.object) {
             changeJsonFun({...jsonData})
@@ -45,6 +53,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             changeJsonFun([...jsonData])
         }
     }
+
     const renameKeyAndValue = function (event: React.ChangeEvent<HTMLInputElement>, fullPath: pathType) {
         const pathLength: number = fullPath.length - 1
         let jsonChang: jsonType = jsonData
@@ -75,9 +84,9 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             }
         })
     }
+
     const saveChangValue = function (fullPath: pathType) {
         let jsonChang: jsonType = jsonData
-
         fullPath.forEach((path) => {
             if (whatType(jsonChang[path]) === types.object || whatType(jsonChang[path]) === types.array) {
                 jsonChang = jsonChang[path]
@@ -100,6 +109,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             }
         })
     }
+
     const arraySwap = function (fullPath: pathType, leftOrRight: string) {
         let jsonChang: jsonType = jsonData
         fullPath.forEach((path, index) => {
@@ -121,9 +131,44 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             }
         })
     }
-    const addToJson = function (fullPath: pathType) {
-        console.log('addToJson', fullPath)
+
+    const addToJson = function (valueInput: string,  fullPath: pathType, optionSelect: string) {
+        const whatToAdd = function (str: string) {
+            if (optionSelect === types.string) {
+                return str
+            }
+            if (optionSelect === types.number) {
+                return +str
+            }
+            if (optionSelect === types.null) {
+                return null
+            }
+            if (optionSelect === types.boolean) {
+                return valueInput === 'true'
+            }
+            if (optionSelect === types.object) {
+                return {}
+            }
+            if (optionSelect === types.array) {
+                return []
+            }
+        }
+        let jsonChang: jsonType = jsonData
+        fullPath.forEach((path, index) => {
+            if (index < (fullPath.length - 1)) {
+                jsonChang = jsonChang[path]
+            } else {
+                if (whatType(jsonChang[path]) === types.object) {
+                    jsonChang[path] = {...jsonChang[path], [valueInput]: whatToAdd('')}
+                }
+                if (whatType(jsonChang[path]) === types.array) {
+                    jsonChang[path].push(whatToAdd(valueInput))
+                }
+                typesSaveJson()
+            }
+        })
     }
+
     const removeFromJson = function (fullPath: pathType) {
         let jsonChang: jsonType = jsonData
         fullPath.forEach((path, index) => {
@@ -140,19 +185,21 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             }
         })
     }
+
     const [currentClick, setCurrentClick] = useState<pathType>(pathNull)
     const isShowInput = function (fullPath: pathType) {
         return (
-            currentClick.length === fullPath.length &&
+            (currentClick.length === fullPath.length) &&
             currentClick.every((value, index) => value === fullPath[index])
         )
     }
+
     const renderClickDivElKey = function (keyObj: string, valueObj: fileType, path: pathType) {
         return (
             <div
                 className={['renderClickDivElKey', whatType(valueObj) === types.object ||
                 whatType(valueObj) === types.array ?
-                    'mt-1' : 'mt-2', 'pb-1 cursor-pointer bg-blue-50 mb-auto rounded'].join(' ')}
+                    'mt-1' : 'mt-2', 'pb-1 cursor-pointer bg-blue-50 hover:bg-blue-100 mb-auto rounded'].join(' ')}
                 onClick={(event) => {
                     event.stopPropagation()
                     if (currentClick.length) return
@@ -172,6 +219,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             </div>
         )
     }
+
     const renderValueObj = function (valueObj: fileType, path: pathType) {
         switch (whatType(valueObj)) {
             case types.string:
@@ -195,6 +243,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                 return returnHTML(valueObj, path)
         }
     }
+
     const renderInputEl = function (value: fileType, path: pathType) {
         return (whatType(value) !== types.object &&
             <div
@@ -239,16 +288,18 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                         typeValueInput={whatType(value)}
                         value={String(value)}
                         optionType={handleOptionType}
+                        area={types.string}
                     />}
             </div>)
     }
+
     const renderClickDivElValue = function (valueObj: fileType, path: pathType) {
         return (
             <div
             className={['renderClickDivElValue flex flex-row', (whatType(valueObj) === types.object || whatType(valueObj) === types.array) ? '' : classForTailwind('g')].join(' ')}
             >
                 <div
-                    className={['my-2', whatType(valueObj) === types.object || whatType(valueObj) === types.array ? '' : 'cursor-pointer bg-green-50 rounded'].join(' ')}
+                    className={['my-2', whatType(valueObj) === types.object || whatType(valueObj) === types.array ? '' : 'cursor-pointer bg-green-50 hover:bg-green-100 rounded'].join(' ')}
                     onClick={(event) => {
                         event.stopPropagation()
                         if (currentClick.length) return
@@ -266,7 +317,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                     }
                 </div>
                 {!(whatType(valueObj) === types.object || whatType(valueObj) === types.array) &&
-                    <div className={['mt-4 cursor-pointer ml-2 hover:bg-red-100 rounded relative top-0 h-6', classForTailwind('')].join(' ')}
+                    <div className={['mt-4 cursor-pointer ml-2 hover:bg-red-100 active:bg-red-400 rounded relative top-0 h-6 opacity-30 hover:opacity-100 active:opacity-80', classForTailwind('')].join(' ')}
                          onClick={() => {
                              removeFromJson(path)
                          }}
@@ -276,6 +327,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             </div>
         )
     }
+
     const classForTailwind = function (group: string) {
         if (CSSGroupIndex.current === (CSSGroup.length - 1)) {
             CSSGroupIndex.current = 0
@@ -287,6 +339,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             return CSSGroup[CSSGroupIndex.current - 1].groupHover
         }
     }
+
     const returnHTML = function (jsonObj: fileType, path: pathType) {
         if (jsonObj instanceof Array) {
             return (
@@ -322,9 +375,10 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                     <div className='flex flex-row text-xl'>
                         &#93;
                         <TheHellipHorizontal
-                            addObjectInJson={() => addToJson(path)}
+                            addObjectInJson={(valueInput, path, optionSelect) => addToJson(valueInput, path, optionSelect)}
                             removeObjectInJson={() => removeFromJson(path)}
                             path={path}
+                            type={types.array}
                         />
                     </div>
 
@@ -371,9 +425,10 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                     <div className='returnHTML__any flex flex-row text-xl'>
                         &#125;
                         <TheHellipHorizontal
-                            addObjectInJson={() => addToJson(path)}
+                            addObjectInJson={(valueInput, path, optionSelect) => addToJson(valueInput, path, optionSelect)}
                             removeObjectInJson={() => removeFromJson(path)}
                             path={path}
+                            type={types.object}
                         />
                     </div>
                 </div>
@@ -383,6 +438,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
         }
 
     }
+
     return (
         <div className='HtmlJson'>
             <div

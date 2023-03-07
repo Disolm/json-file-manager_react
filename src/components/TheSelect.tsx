@@ -6,8 +6,9 @@ interface SelectProps {
     typeValueInput: string
     value: string
     optionType: (event: string) => void
+    area: string
 }
-export function TheSelect({typeValueInput, value, optionType}:SelectProps) {
+export function TheSelect({typeValueInput, value, optionType, area}:SelectProps) {
     const options: Array<ITypeOption> = [
         {
             type: types.string,
@@ -45,16 +46,22 @@ export function TheSelect({typeValueInput, value, optionType}:SelectProps) {
     }
 
     const isDisabled = function (option: ITypeOption) {
-        if (option.type === 'string') {
+        if (option.type === types.string) {
             return false
         }
-        if (!Number.isNaN(+value) && option.type === types.number) {
+        if (!Number.isNaN(+value) && option.type === types.number && value && area !== types.object) {
             return false
         }
-        if (value === types.null && option.type === types.null){
+        if (value === types.null && option.type === types.null && area !== types.object){
             return false
         }
-        return !((value === 'true' || value === 'false') && option.type === types.boolean);
+        if ((value === 'true' || value === 'false') && option.type === types.boolean && area !== types.object) {
+            return false
+        }
+        if (area === types.object || area === types.array) {
+            return !(option.type === types.array || option.type === types.object || option.type === types.string)
+        }
+        return true
     }
     const [valueSelect, setValueSelect] = useState<string>(whatSelectDefault(typeValueInput))
     const changeHandler = (event: React.ChangeEvent<HTMLSelectElement>) => {

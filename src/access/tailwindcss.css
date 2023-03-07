@@ -80,6 +80,7 @@
         border-b-8
         border-b-teal-300
         hover:border-b-teal-600
+        active:border-b-teal-800
     }
     .triangle-down,.triangle-up {
         width: 0;
@@ -98,5 +99,6 @@
         border-t-8
         border-t-teal-300
         hover:border-t-teal-600
+        active:border-t-teal-800
     }
 }
