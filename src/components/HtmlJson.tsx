@@ -20,16 +20,13 @@ interface JsonProps {
 
 export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJsonFun}: JsonProps) {
     const classButton: string = 'mx-1 px-3 border border-blue-600 bg-white rounded active:bg-blue-200'
-
     const classHoverObjAndArr: string = 'hover:border-l-4 hover:border-blue-100 border-solid border-white border-l-4'
-
     const pathNull: [] = []
-
     const [selectedOptionType, setSelectedOptionType] = useState<string>(types.string)
-
     const thisIsKey = useRef<boolean>(true)
-
     const CSSGroupIndex = useRef<number>(0)
+    const [cursorRemove, setCursorRemove] = useState<boolean>(false)
+    const allowDelete = useRef<boolean>(true)
 
     const handleOptionType = function (event: string) {
         setSelectedOptionType(event)
@@ -193,7 +190,18 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
             currentClick.every((value, index) => value === fullPath[index])
         )
     }
-
+    const toggleClass = function (event: React.MouseEvent, path: pathType) {
+        const timerRemove = 500
+        if (event.button === 0) {
+            setCursorRemove(true)
+            setTimeout(()=>{
+                if (!allowDelete.current) {
+                    removeFromJson(path)
+                }
+                setCursorRemove(false)
+            }, timerRemove)
+        }
+    }
     const renderClickDivElKey = function (keyObj: string, valueObj: fileType, path: pathType) {
         return (
             <div
@@ -317,9 +325,23 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                     }
                 </div>
                 {!(whatType(valueObj) === types.object || whatType(valueObj) === types.array) &&
-                    <div className={['mt-4 cursor-pointer ml-2 hover:bg-red-100 active:bg-red-400 rounded relative top-0 h-6 opacity-30 hover:opacity-100 active:opacity-80', classForTailwind('')].join(' ')}
-                         onClick={() => {
-                             removeFromJson(path)
+                    <div className={
+                        ['mt-4 cursor-pointer ml-2 hover:bg-red-100 active:bg-red-400 rounded',
+                            'relative top-0 h-6 w-6 opacity-30 hover:opacity-100 active:opacity-80',
+                        classForTailwind(''),
+                        cursorRemove ? 'cursor-long-click' : ''].join(' ')
+                    }
+                         onMouseDown={(event)=>{
+                             toggleClass(event, path)
+                             allowDelete.current = false
+                         }}
+                         onMouseUp={()=>{
+                             allowDelete.current = true
+                             setCursorRemove(false)
+                         }}
+                         onMouseOut={()=>{
+                             allowDelete.current = true
+                             setCursorRemove(false)
                          }}
                     >
                         &#128465;
@@ -376,7 +398,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                         &#93;
                         <TheHellipHorizontal
                             addObjectInJson={(valueInput, path, optionSelect) => addToJson(valueInput, path, optionSelect)}
-                            removeObjectInJson={() => removeFromJson(path)}
+                            removeObjectInJson={(fullPath) => removeFromJson(fullPath)}
                             path={path}
                             type={types.array}
                         />
@@ -426,7 +448,7 @@ export function HtmlJson({jsonData, saveJsonFun, changeJsonFun, cancelChangeJson
                         &#125;
                         <TheHellipHorizontal
                             addObjectInJson={(valueInput, path, optionSelect) => addToJson(valueInput, path, optionSelect)}
-                            removeObjectInJson={() => removeFromJson(path)}
+                            removeObjectInJson={(fullPath) => removeFromJson(fullPath)}
                             path={path}
                             type={types.object}
                         />

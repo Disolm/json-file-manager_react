@@ -4,7 +4,7 @@ import {TheSelect} from "./TheSelect";
 interface HellipProps {
     path: (string | number)[]
     addObjectInJson: (valueInput: string, path: HellipProps['path'], optionSelect: string) => void
-    removeObjectInJson: () => void
+    removeObjectInJson: (fullPath: HellipProps['path']) => void
     type: string
 }
 export function TheHellipHorizontal({addObjectInJson, removeObjectInJson, path, type}: HellipProps) {
@@ -27,13 +27,13 @@ export function TheHellipHorizontal({addObjectInJson, removeObjectInJson, path, 
     const handleOptionType = function (option: string) {
         setOptionSelect(option)
     }
-    const toggleClass = function (event: React.MouseEvent) {
-        const timerRemove = 1000
+    const toggleClass = function (event: React.MouseEvent, fullPath: HellipProps['path']) {
+        const timerRemove = 500
         if (event.button === 0) {
             setCursorRemove(true)
             setTimeout(()=>{
                 if (!allowDelete.current) {
-                    removeObjectInJson()
+                    removeObjectInJson(fullPath)
                 }
                 setCursorRemove(false)
             }, timerRemove)
@@ -65,7 +65,7 @@ export function TheHellipHorizontal({addObjectInJson, removeObjectInJson, path, 
                     <div
                         className={['bg-red-100 my-1 hover:bg-red-200 active:bg-red-100 h-6 w-14', cursorRemove ? 'cursor-long-click' : '', classButton].join(' ')}
                         onMouseDown={(event)=>{
-                            toggleClass(event)
+                            toggleClass(event, path)
                             allowDelete.current = false
                             }}
                         onMouseUp={()=>{

@@ -51,7 +51,7 @@
 .cursor-long-click::after {
     --w: 56px;
     /*--percent: 0%;*/
-    --timerRemove: 1s;
+    --timerRemove: .5s;
     width: var(--w);
     aspect-ratio: 1;
     content: "";
