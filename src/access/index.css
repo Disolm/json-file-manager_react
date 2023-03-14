@@ -1,26 +1,76 @@
-/*.triangle-up {*/
-/*    margin-top: .4em;*/
-/*    margin-bottom: .2em;*/
-/*    @apply border-solid*/
-/*    border-b-8*/
-/*    border-b-teal-300*/
-/*    hover:border-b-teal-600*/
-/*}*/
-/*.triangle-down,.triangle-up {*/
-/*    width: 0;*/
-/*    height: 0;*/
-/*    border-left: 12px solid transparent;*/
-/*    border-right: 12px solid transparent;*/
-/*    cursor: pointer;*/
-/*    margin-left: 0.2em;*/
-/*    margin-right: 0.2em;*/
-/*    @apply border-solid*/
-/*}*/
-/*.triangle-down {*/
-/*    margin-top: .2em;*/
-/*    margin-bottom: .4em;*/
-/*    @apply border-solid*/
-/*    border-t-8*/
-/*    border-t-teal-300*/
-/*    hover:border-t-teal-600*/
-/*}*/
+.triangle-up {
+    margin-top: .4em;
+    margin-bottom: .2em;
+    @apply border-solid
+    border-b-8
+    border-b-teal-300
+    hover:border-b-teal-600
+}
+.triangle-down,.triangle-up {
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    cursor: pointer;
+    margin-left: 0.2em;
+    margin-right: 0.2em;
+    @apply border-solid
+}
+.triangle-down {
+    margin-top: .2em;
+    margin-bottom: .4em;
+    @apply border-solid
+    border-t-8
+    border-t-teal-300
+    hover:border-t-teal-600
+}
+@keyframes timer {
+   from {--percent:0}
+   5%  {--percent:5%}
+   10% {--percent:10%}
+   15% {--percent:15%}
+   20% {--percent:20%}
+   25% {--percent:25%}
+   30% {--percent:30%}
+   35% {--percent:35%}
+   40% {--percent:40%}
+   45% {--percent:45%}
+   50% {--percent:50%}
+   55% {--percent:55%}
+   60% {--percent:60%}
+   65% {--percent:65%}
+   70% {--percent:70%}
+   75% {--percent:75%}
+   80% {--percent:80%}
+   85% {--percent:85%}
+   90% {--percent:90%}
+   95% {--percent:95%}
+   to  {--percent:100%}
+}
+
+.cursor-long-click::after {
+    --w: 56px;
+    /*--percent: 0%;*/
+    --timerRemove: 1s;
+    width: var(--w);
+    aspect-ratio: 1;
+    content: "";
+    position: relative;
+    z-index: -1;
+    overflow: visible;
+    display: inline-grid;
+    place-content: center;
+    top: -40px;
+    left: -16px;
+    bottom: 16px;
+    right: 40px;
+    background: conic-gradient(rgb(254,202,202) var(--percent), #0000 0);
+    border-radius: 50%;
+    mask: radial-gradient(farthest-side, #0000 calc(100% - 6px), #000 calc(99% - 6px));
+    animation: timer var(--timerRemove) linear both;
+}
+
+
+
+
+

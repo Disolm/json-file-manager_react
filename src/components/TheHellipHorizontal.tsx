@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 import types from "../access/types.json"
 import {TheSelect} from "./TheSelect";
 interface HellipProps {
@@ -8,11 +8,13 @@ interface HellipProps {
     type: string
 }
 export function TheHellipHorizontal({addObjectInJson, removeObjectInJson, path, type}: HellipProps) {
-    const classButton: string = 'ml-2 px-4 rounded-2xl cursor-pointer w-min text-base'
+    const classButton: string = 'ml-2 px-4 rounded-2xl cursor-pointer text-base z-10'
     const [isShowButtons, setIsShowButtons] = useState<boolean>(false)
     const [isShowInput, setIsShowInput] = useState<boolean>(false)
     const [valueInput, setValueInput] = useState<string>('')
     const [optionSelect, setOptionSelect] = useState<string>(types.string)
+    const [cursorRemove, setCursorRemove] = useState<boolean>(false)
+    const allowDelete = useRef<boolean>(true)
     const changeHandlerInput = (event: React.ChangeEvent<HTMLInputElement>) => {
         setValueInput(event.target.value)
     }
@@ -24,6 +26,18 @@ export function TheHellipHorizontal({addObjectInJson, removeObjectInJson, path, 
     }
     const handleOptionType = function (option: string) {
         setOptionSelect(option)
+    }
+    const toggleClass = function (event: React.MouseEvent) {
+        const timerRemove = 1000
+        if (event.button === 0) {
+            setCursorRemove(true)
+            setTimeout(()=>{
+                if (!allowDelete.current) {
+                    removeObjectInJson()
+                }
+                setCursorRemove(false)
+            }, timerRemove)
+        }
     }
     return (
         <>
@@ -49,10 +63,21 @@ export function TheHellipHorizontal({addObjectInJson, removeObjectInJson, path, 
                         Добавить
                     </div>
                     <div
-                        className={['bg-red-100 my-1 hover:bg-red-200 active:bg-red-100', classButton].join(' ')}
-                        onClick={removeObjectInJson}
+                        className={['bg-red-100 my-1 hover:bg-red-200 active:bg-red-100 h-6 w-14', cursorRemove ? 'cursor-long-click' : '', classButton].join(' ')}
+                        onMouseDown={(event)=>{
+                            toggleClass(event)
+                            allowDelete.current = false
+                            }}
+                        onMouseUp={()=>{
+                            allowDelete.current = true
+                            setCursorRemove(false)
+                            }}
+                        onMouseOut={()=>{
+                            allowDelete.current = true
+                            setCursorRemove(false)
+                            }}
                     >
-                        Удалить
+                        &#128465;
                     </div>
                 </div>}
                 {(isShowButtons && isShowInput) &&
